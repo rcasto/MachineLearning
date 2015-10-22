@@ -1,22 +1,31 @@
-(function () {
-    "use strict";
-    
-    function generatePoint(xMax, yMax) {
-        return {
-            x: xMax * Math.random() + 0.0001,
-            y: yMax * Math.random() + 0.0001
-        };
+function Perceptron() {
+    this.weights = null;
+    this.bias = 0;
+}
+
+Perceptron.prototype.train = function (features, label) {
+    if (!this.weights) {
+        this.weights = features;
+        this.bias = 1;
     }
-    
-    function generateLine() {
-        var p1 = generatePoint(10, 10);
-        var p2 = generatePoint(10, 10);
-        var m = (p1.y - p2.y) / (p1.x - p2.x);
-        return {
-            m: m,
-            b: p1.y - m * p1.x
-        };
+    var guess = this.predict(features);
+    // incorrect guess, update weights
+    if (guess !== label) {
+        var gradient = label - guess;
+        this.weights = this.weights.map(function (weight, i) {
+            return weight + gradient * features[i];
+        });
+        this.bias += gradient;
     }
-    
-    console.log(generateLine());
-}());
+    return this;
+};
+
+Perceptron.prototype.predict = function (features) {
+    if (!this.weights) { return; }
+    var score = 0;
+    this.weights.forEach(function (weight, i) {
+        score += weight * features[i];
+    });
+    score += this.bias;
+    return score > 0 ? 1 : -1;
+};
